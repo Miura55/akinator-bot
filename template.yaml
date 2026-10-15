@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Akinator LINE bot backed by akinator.com via akinator-client (Lambda + API Gateway HTTP API + DynamoDB)
+
+Parameters:
+  LineChannelSecret:
+    Type: String
+    NoEcho: true
+    Description: LINE Messaging API のチャネルシークレット
+  LineChannelAccessToken:
+    Type: String
+    NoEcho: true
+    Description: LINE Messaging API のチャネルアクセストークン（長期）
+  AkinatorLanguage:
+    Type: String
+    Default: jp
+    Description: Akinator の言語コード（jp / en など。akinator-client の Languages に対応）
+  AkinatorChildMode:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['true', 'false']
+    Description: チャイルドモード（露骨な内容を避ける）
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Architectures: [arm64]
+    Timeout: 29
+    MemorySize: 512
+
+Resources:
+  GamesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+
+  WebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: src/handler.handler
+      Environment:
+        Variables:
+          LINE_CHANNEL_SECRET: !Ref LineChannelSecret
+          LINE_CHANNEL_ACCESS_TOKEN: !Ref LineChannelAccessToken
+          GAMES_TABLE: !Ref GamesTable
+          AKINATOR_LANGUAGE: !Ref AkinatorLanguage
+          AKINATOR_CHILD_MODE: !Ref AkinatorChildMode
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref GamesTable
+      Events:
+        Webhook:
+          Type: HttpApi
+          Properties:
+            Path: /webhook
+            Method: POST
+
+Outputs:
+  WebhookUrl:
+    Description: LINE Developers コンソールの Webhook URL に設定する値
+    Value: !Sub 'https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/webhook'
+  GamesTableName:
+    Value: !Ref GamesTable
