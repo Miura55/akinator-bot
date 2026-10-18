@@ -104,7 +104,7 @@ aws cloudformation describe-stacks --stack-name akinator-line-bot \
 ```bash
 npm test                                  # 全テスト
 node --test test/game.test.js             # ファイル単位
-node --test test/ --test-name-pattern "署名"   # テスト名で絞り込み
+node --test --test-name-pattern "署名" test/*.test.js   # テスト名で絞り込み
 sam validate --lint                       # テンプレートの検証
 ```
 

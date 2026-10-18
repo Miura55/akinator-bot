@@ -1,14 +1,10 @@
 'use strict';
 
-const { AkinatorClient, Languages, Themes, Answers } = require('akinator-client');
+const { AkinatorClient, Languages, Themes } = require('akinator-client');
 
-// akinator-client 1.3.0 の start() は 2026-10 時点の akinator.com と 3 点ずれているため、
-// インスタンスの start() だけ差し替えて使う（answer / continue / submitWin はそのまま）。
-//   1. <input name="signature"> が廃止された（ページ自身も session しか送らない）
-//   2. 最初の質問の step が 0 ではなく 1（ページが localStorage.setItem('step', '1') する）。
-//      step: 0 で /answer を叩くと {"completion":"KO"} が返る
-//   3. <p class="question-text"\n id="question-label"> のようにタグ内に改行が入る
-// また toJSON() にクッキーが含まれないので、DynamoDB に保存できるよう持ち回る。
+// akinator-client 1.3.0 の start() を現在の HTML に合わせる。
+// signature は任意、最初の step は 1。質問タグ内の改行も許容する。
+// step を 0 で送ると /answer が KO を返すため、この差し替えが必要。
 
 const DEFAULT_LANGUAGE = Languages.Japanese; // 'jp'
 
@@ -53,7 +49,7 @@ const patch = (client) => {
   return client;
 };
 
-// 保存用。toJSON() にクッキーを足す
+// toJSON() が含めないクッキーも保存し、次のリクエストでセッションを復元する。
 const serialize = (client) => ({ ...client.toJSON(), cookies: { ...client._cookies } });
 
 const createAkinatorClient = ({ language = DEFAULT_LANGUAGE, childMode = false, theme = Themes.Character } = {}) =>
@@ -69,9 +65,4 @@ module.exports = {
   createAkinatorClient,
   restoreAkinatorClient,
   serialize,
-  parseChildMode,
-  DEFAULT_LANGUAGE,
-  Answers,
-  Languages,
-  Themes,
 };

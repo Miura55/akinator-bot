@@ -55,6 +55,14 @@ const createHandler = ({ channelSecret, lineClient, store, game, logger = consol
   const handleAction = async (userId, action) => {
     const state = await store.get(userId);
 
+    // 推測へのテキスト回答もボタンと同じアクションとして扱う。
+    if (action.type === 'answer' && state?.phase === 'guess') {
+      const lower = action.text.toLowerCase();
+      if (['はい', 'yes', 'y', '正解', '正解！'].includes(lower)) action = { type: 'guessYes' };
+      else if (['いいえ', 'no', 'n', '違う', 'ちがう'].includes(lower)) action = { type: 'guessNo' };
+      else return msg.guessMessages(state.guess);
+    }
+
     switch (action.type) {
       case 'start-prompt':
         return [msg.startPrompt()];
@@ -70,13 +78,6 @@ const createHandler = ({ channelSecret, lineClient, store, game, logger = consol
 
       case 'answer': {
         if (!state) return [msg.startPrompt()];
-        if (state.phase === 'guess') {
-          // 推測の表示中に はい/いいえ で答えてきた場合
-          const lower = action.text.toLowerCase();
-          if (['はい', 'yes', 'y', '正解', '正解！'].includes(lower)) return handleAction(userId, { type: 'guessYes' });
-          if (['いいえ', 'no', 'n', '違う', 'ちがう'].includes(lower)) return handleAction(userId, { type: 'guessNo' });
-          return msg.guessMessages(state.guess);
-        }
         // Akinator には 5 択しか渡せないので、それ以外の自由入力は同じ質問を出し直す
         const answer = msg.toAnswerIndex(action.text);
         if (answer === null) {
@@ -123,7 +124,7 @@ const createHandler = ({ channelSecret, lineClient, store, game, logger = consol
     await lineClient.replyMessage({ replyToken: event.replyToken, messages: messages.slice(0, 5) });
   };
 
-  // API Gateway (HTTP API, payload v2) / Lambda Function URL のイベントを受ける
+  // API Gateway HTTP API の Webhook を受け、元の本文で署名を検証する。
   return async (event) => {
     const headers = event.headers || {};
     const signature = headers['x-line-signature'] || headers['X-Line-Signature'];
@@ -142,7 +143,7 @@ const createHandler = ({ channelSecret, lineClient, store, game, logger = consol
       return { statusCode: 400, body: 'invalid body' };
     }
 
-    // LINE へは必ず 200 を返す（失敗すると LINE 側が再送してくる）
+    // 有効な Webhook は個別イベントの処理に失敗しても 200 を返し、再送を防ぐ。
     await Promise.all(
       (payload.events || []).map((e) => handleEvent(e).catch((err) => logger.error('event error', { err }))),
     );

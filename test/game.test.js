@@ -69,11 +69,12 @@ test('answer は保存した状態から復元して回答を渡し、次の質�
 test('推測が返ったら guess ターンになり、phase が guess になる', async () => {
   const client = fakeClient([{ won: true, ko: false, step: 14, progression: 98 }]);
   const game = createGame({ clientFactory: factoryFor(client) });
-  const { state, turn } = await game.answer({ client: {}, questionCount: 13, phase: 'question' }, Answers.Yes);
+  const { state, turn } = await game.answer({ client: {}, questionCount: 13, phase: 'question', question: '前の質問' }, Answers.Yes);
 
   assert.deepEqual(turn, { type: 'guess', name: 'ドラえもん', description: 'ネコ型ロボット', pictureUrl: 'https://img.example/d.jpg' });
   assert.equal(state.phase, 'guess');
-  assert.deepEqual(state.guess, turn && { name: 'ドラえもん', description: 'ネコ型ロボット', pictureUrl: 'https://img.example/d.jpg' });
+  assert.deepEqual(state.guess, { name: 'ドラえもん', description: 'ネコ型ロボット', pictureUrl: 'https://img.example/d.jpg' });
+  assert.equal(state.question, undefined);
 });
 
 test('rejectGuess は continue() で候補を除外して質問を続ける', async () => {
@@ -100,7 +101,7 @@ test('Akinator が ko を返したら giveup ターンになる', async () => {
   const game = createGame({ clientFactory: factoryFor(client) });
   const { state, turn } = await game.answer({ client: {}, questionCount: 79, phase: 'question' }, Answers.No);
   assert.equal(turn.type, 'giveup');
-  assert.equal(state.phase, 'done');
+  assert.equal(state, undefined);
 });
 
 test('クライアントのエラーはそのまま伝わる', async () => {

@@ -138,8 +138,16 @@ test('違うと答えたら rejectGuess して質問を続ける', async () => {
   assert.match(replies[0].messages[1].text, /Q3/);
 });
 
+test('推測中にテキストで「違う」と答えても質問を続ける', async () => {
+  const { handler, replies, game, db } = setup({ saved: guessState() });
+  await handler(lambdaEvent({ events: [textEvent('違う')] }));
+  assert.deepEqual(game.calls, [['rejectGuess']]);
+  assert.match(replies[0].messages[1].text, /Q3/);
+  assert.equal(db.get('U1').phase, 'question');
+});
+
 test('降参でゲームが削除され、もう一回ボタンが出る', async () => {
-  const turns = { answer: { state: { ...questionState(), phase: 'done' }, turn: { type: 'giveup', text: '参りました' } } };
+  const turns = { answer: { turn: { type: 'giveup', text: '参りました' } } };
   const { handler, replies, db } = setup({ saved: questionState(), turns });
   await handler(lambdaEvent({ events: [postbackEvent('answer=はい')] }));
   assert.match(replies[0].messages[0].text, /参りました/);
