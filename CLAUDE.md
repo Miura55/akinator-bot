@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Akinator LINE bot: the real akinator.com plays the guesser, reached through the unofficial
 `akinator-client` npm package. Runs on AWS Lambda (API Gateway HTTP API + DynamoDB), deployed with AWS SAM.
 Plain CommonJS Node.js, no build step, no TypeScript, no linter. Tests use the built-in `node:test` runner.
-Lambda runtime is `nodejs20.x`; local Node 18 works for tests but `npm install` prints engine warnings.
+Lambda runtime is `nodejs24.x`; use Node.js 24 or later for local development and tests.
 
 History: the project started on `aki-api` (blocked by Cloudflare), then used Bedrock models (Claude on
 Bedrock was unavailable for this account; Amazon Nova Pro via the Converse API worked but guessed poorly).

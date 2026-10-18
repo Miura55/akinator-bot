@@ -18,7 +18,7 @@
   "author": "KMiura",
   "license": "ISC",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "dependencies": {
     "@line/bot-sdk": "^11.3.0",
