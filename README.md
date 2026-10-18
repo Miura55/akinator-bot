@@ -4,7 +4,7 @@ AWS Lambda 上で動く、アキネーターの LINE bot です。思い浮か�
 
 ## 構成
 
-- **AWS Lambda** (Node.js 20, arm64): LINE の Webhook を受けて akinator.com と会話します
+- **AWS Lambda** (Node.js 24, arm64): LINE の Webhook を受けて akinator.com と会話します
 - **akinator-client**: akinator.com の非公式クライアント。Cloudflare の確認ページを `got-scraping` で通過します
 - **API Gateway (HTTP API)**: `POST /webhook` を Lambda に渡します
 - **DynamoDB**: LINE ユーザーごとのゲーム状態（Akinator のセッション）を保存します（TTL 1 時間）
@@ -41,7 +41,7 @@ akinator-client 1.3.0 の `start()` は現在の akinator.com と 3 点ずれて
 
 ## 必要なもの
 
-- Node.js 20 以上
+- Node.js 24 以上
 - [AWS CLI](https://docs.aws.amazon.com/cli/) と認証情報
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 - LINE Developers で作成した Messaging API チャネル
@@ -104,7 +104,7 @@ aws cloudformation describe-stacks --stack-name akinator-line-bot \
 ```bash
 npm test                                  # 全テスト
 node --test test/game.test.js             # ファイル単位
-node --test test/ --test-name-pattern "署名"   # テスト名で絞り込み
+node --test --test-name-pattern "署名" test/*.test.js   # テスト名で絞り込み
 sam validate --lint                       # テンプレートの検証
 ```
 
@@ -132,5 +132,5 @@ samconfig.toml  SAM の既定設定（スタック名など）
 
 - akinator.com への各リクエストは 0.3〜1.5 秒程度です。Lambda のタイムアウトは 29 秒で、akinator-client は失敗時に最大 3 回リトライします。
 - Akinator が `{"completion":"KO"}` を返した場合（質問が尽きた、またはセッションが無効）は「降参」として扱い、ゲームを終了します。
-- `@aws-sdk/client-dynamodb` と `@aws-sdk/lib-dynamodb` は Lambda の Node.js 20 ランタイムに同梱されているため devDependencies にしています。
+- `@aws-sdk/client-dynamodb` と `@aws-sdk/lib-dynamodb` は Lambda の Node.js 24 ランタイムに同梱されているため devDependencies にしています。
 - 以前は Amazon Bedrock（Converse API + Amazon Nova Pro）をアキネーター役にしていました。本家 Akinator のほうが精度が高いため置き換えています。

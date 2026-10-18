@@ -8,7 +8,7 @@ const {
   DeleteCommand,
 } = require('@aws-sdk/lib-dynamodb');
 
-const DEFAULT_TTL_SECONDS = 60 * 60; // Akinator 側のセッションも長くは持たないので 1 時間
+const DEFAULT_TTL_SECONDS = 60 * 60; // 保存したゲーム状態の TTL は 1 時間。
 
 // LINE のユーザー ID をキーにゲーム状態を保存する DynamoDB ストア。
 const createStore = ({ tableName, ttlSeconds = DEFAULT_TTL_SECONDS, client } = {}) => {

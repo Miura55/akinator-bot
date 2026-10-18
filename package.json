@@ -4,7 +4,7 @@
   "description": "Akinator LINE bot backed by akinator.com (akinator-client), running on AWS Lambda",
   "main": "src/handler.js",
   "scripts": {
-    "test": "node --test test/",
+    "test": "node --test test/*.test.js",
     "build": "sam build",
     "deploy": "sam deploy",
     "logs": "sam logs --stack-name akinator-line-bot --name WebhookFunction --tail"
@@ -18,7 +18,7 @@
   "author": "KMiura",
   "license": "ISC",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "dependencies": {
     "@line/bot-sdk": "^11.3.0",

@@ -6,24 +6,24 @@ Parameters:
   LineChannelSecret:
     Type: String
     NoEcho: true
-    Description: LINE Messaging API のチャネルシークレット
+    Description: LINE Messaging API channel secret
   LineChannelAccessToken:
     Type: String
     NoEcho: true
-    Description: LINE Messaging API のチャネルアクセストークン（長期）
+    Description: LINE Messaging API long-lived channel access token
   AkinatorLanguage:
     Type: String
     Default: jp
-    Description: Akinator の言語コード（jp / en など。akinator-client の Languages に対応）
+    Description: Akinator language code (e.g. jp or en, as defined by akinator-client Languages)
   AkinatorChildMode:
     Type: String
     Default: 'false'
     AllowedValues: ['true', 'false']
-    Description: チャイルドモード（露骨な内容を避ける）
+    Description: Enable child mode to avoid explicit content
 
 Globals:
   Function:
-    Runtime: nodejs20.x
+    Runtime: nodejs24.x
     Architectures: [arm64]
     Timeout: 29
     MemorySize: 512
@@ -67,7 +67,7 @@ Resources:
 
 Outputs:
   WebhookUrl:
-    Description: LINE Developers コンソールの Webhook URL に設定する値
+    Description: Webhook URL to set in the LINE Developers console
     Value: !Sub 'https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/webhook'
   GamesTableName:
     Value: !Ref GamesTable

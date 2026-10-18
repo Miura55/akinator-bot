@@ -21,8 +21,6 @@ const toAnswerIndex = (text) => {
   return v === undefined ? null : v;
 };
 
-const ANSWER_WORDS = new Set(ANSWER_INDEX.keys());
-
 const START_WORDS = new Set(['スタート', 'すたーと', 'はじめる', '始める', 'start', 'あきねーたー', 'アキネーター']);
 const QUIT_WORDS = new Set(['やめる', '終了', 'おわり', '終わり', 'quit', 'stop', 'リセット', 'reset']);
 
@@ -70,15 +68,11 @@ const restartPrompt = (text) => ({
 });
 
 module.exports = {
-  ANSWER_LABELS,
-  ANSWER_WORDS,
   START_WORDS,
   QUIT_WORDS,
   toAnswerIndex,
   questionMessage,
-  guessMessage,
   guessMessages,
-  imageMessage,
   textMessage,
   startPrompt,
   restartPrompt,
